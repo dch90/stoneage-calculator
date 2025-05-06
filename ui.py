@@ -30,6 +30,14 @@ preset_dropdown = ttk.Combobox(root, textvariable=preset_var)
 preset_dropdown['values'] = all_labels
 preset_dropdown.grid(row=1, column=1, columnspan=2, padx=10, pady=10, sticky="ew")
 
+# Bind the Combobox selection to populate input fields
+def on_combobox_select(event):
+    selected_value = preset_var.get()
+    if selected_value in preset_data:
+        populate_entries(preset_data[selected_value])
+
+preset_dropdown.bind("<<ComboboxSelected>>", on_combobox_select)
+
 # Input labels and fields
 labels = ['초기계수', '체', '공', '방', '순']
 entries = []
@@ -38,6 +46,34 @@ for i in range(5):
     entry = tk.Entry(root)
     entry.grid(row=i + 2, column=1, padx=10, pady=5)
     entries.append(entry)
+
+# Create a search box above the result box
+search_label = tk.Label(root, text="검색:")
+search_label.grid(row=6, column=3, padx=10, pady=10, sticky="e")
+
+search_entry = tk.Entry(root)
+search_entry.grid(row=6, column=4, padx=10, pady=10, sticky="ew")
+
+# Function to search and highlight within the result box
+def search_in_result(event=None):
+    search_text = search_entry.get()
+    result_box.config(state=tk.NORMAL)
+    result_box.tag_remove("highlight", "1.0", tk.END)  # Remove previous highlights
+    if search_text:
+        idx = "1.0"
+        while True:
+            # Search for the text
+            idx = result_box.search(search_text, idx, nocase=True, stopindex=tk.END)
+            if not idx:
+                break
+            end_idx = f"{idx}+{len(search_text)}c"
+            result_box.tag_add("highlight", idx, end_idx)
+            result_box.tag_configure("highlight", background="yellow")
+            idx = end_idx
+    result_box.config(state=tk.DISABLED)
+
+# Bind the search function to the search entry for real-time updates
+search_entry.bind("<KeyRelease>", search_in_result)
 
 # Result display
 tk.Label(root, text="레벨1 페트 스탯이 베이스맥스(+2, +2, +2, +2)일 확률:").grid(row=0, column=3, padx=10, pady=10)
@@ -102,7 +138,8 @@ def on_key_press(event):
 preset_dropdown.bind("<Key>", on_key_press)
 
 # Layout stretch
-root.grid_columnconfigure(3, weight=0)
-root.grid_rowconfigure(1, weight=0)
+root.grid_columnconfigure(3, weight=1)
+root.grid_rowconfigure(1, weight=1)
+root.grid_rowconfigure(0, weight=0)
 
 root.mainloop()
