@@ -1,63 +1,111 @@
 # -*- coding: utf-8 -*-
 
 import tkinter as tk
-from tkinter import PhotoImage
+from tkinter import ttk
 from calculator import pet_calculate, formatted_distribution
 
-# Function for calculations (example: sum of values from textboxes)
-def calculate():
-    try:
-        distribution = pet_calculate(
-            int(entries[0].get()),
-            int(entries[1].get()),
-            int(entries[2].get()),
-            int(entries[3].get()),
-            int(entries[4].get())
-        )
-        result_box.config(state=tk.NORMAL)
-        result_box.delete("1.0", tk.END)
-        result_box.insert("1.0", formatted_distribution(distribution))
-        result_box.config(state=tk.DISABLED)
-    except ValueError:
-        result_box.delete("1.0", tk.DISABLED)
-        result_box.insert("1.0", "잘못된 입력")
+# Load presets from file
+preset_data = {}
+with open("data.txt", encoding="utf-8") as f:
+    for line in f:
+        parts = line.strip().split("\t")
+        if len(parts) == 6:
+            key = parts[0]
+            values = list(map(int, parts[1:]))
+            preset_data[key] = values
 
-# Create the main window
+all_labels = list(preset_data.keys())
+
+# GUI Setup
 root = tk.Tk()
-
 root.title("StoneAge Classic - Level 1 Pet Base Distribution")
 
-# Create labels for text entry fields
-labels = ['초기계수', '체', '공', '방', '순']  # You can change the labels here
-entries = []  # List to store entry widgets
+# Dropdown logic
+preset_var = tk.StringVar()
+preset_dropdown = ttk.Combobox(root, textvariable=preset_var)
+preset_dropdown['values'] = all_labels
+preset_dropdown.grid(row=0, column=1, columnspan=2, padx=10, pady=10, sticky="ew")
 
-# Create entry fields and labels on the left side
+# Input labels and fields
+labels = ['초기계수', '체', '공', '방', '순']
+entries = []
 for i in range(5):
-    # Label
-    label = tk.Label(root, text=labels[i])
-    label.grid(row=i+1, column=0, padx=10, pady=10, sticky="e")  # Align labels to the right
-    
-    # Entry field
+    tk.Label(root, text=labels[i]).grid(row=i + 1, column=0, padx=10, pady=5, sticky="e")
     entry = tk.Entry(root)
-    entry.grid(row=i+1, column=1, padx=10, pady=10)
+    entry.grid(row=i + 1, column=1, padx=10, pady=5)
     entries.append(entry)
 
+# Result display
+tk.Label(root, text="레벨1 페트 스탯이 베이스맥스(+2, +2, +2, +2)일 확률:").grid(row=0, column=3, padx=10, pady=10)
+result_box = tk.Text(root, height=10, width=40, state=tk.DISABLED)
+result_box.grid(row=1, column=3, rowspan=5, padx=10, pady=10, sticky="nsew")
 
-# Create a label for the calculation result on the right side, above the result textbox
-result_label = tk.Label(root, text="레벨1 페트 스탯이 베이스맥스(+2, +2, +2, +2)일 확률:")
-result_label.grid(row=0, column=3, padx=0, pady=0)
+# Populate input boxes
+def populate_entries(values):
+    for i in range(5):
+        entries[i].delete(0, tk.END)
+        entries[i].insert(0, str(values[i]))
 
-# Result box (uneditable and spans the height of the window)
-result_box = tk.Text(root, state=tk.DISABLED)
-result_box.grid(row=1, column=3, rowspan=5, padx=1, pady=1, sticky="nsew")
+# Button: Calculate
+def calculate():
+    try:
+        values = [int(e.get()) for e in entries]
+        dist = pet_calculate(*values)
+        result_box.config(state=tk.NORMAL)
+        result_box.delete("1.0", tk.END)
+        result_box.insert("1.0", formatted_distribution(dist))
+        result_box.config(state=tk.DISABLED)
+    except ValueError:
+        result_box.config(state=tk.NORMAL)
+        result_box.delete("1.0", tk.END)
+        result_box.insert("1.0", "잘못된 입력")
+        result_box.config(state=tk.DISABLED)
 
-# Calculate button (centered below the input and result textboxes)
-calculate_button = tk.Button(root, text="계산", command=calculate)
-calculate_button.grid(row=6, column=0, columnspan=5, pady=20)
+tk.Button(root, text="계산", command=calculate).grid(row=6, column=0, columnspan=5, pady=20)
 
-# Configure the grid to make the result box and button flexible
-root.grid_rowconfigure(1, weight=0)  # Make the result box span all the way down
-root.grid_columnconfigure(3, weight=1)  # Make the result box span the entire width
+# Update dropdown suggestions and optionally populate
+def on_dropdown_change(event=None):
+    typed = preset_var.get()
 
-# Run the main event loop
+    # If exact match, populate
+    if typed in preset_data:
+        populate_entries(preset_data[typed])
+        return
+
+    # Filter matches (case-sensitive startswith)
+    matches = [label for label in all_labels if label.startswith(typed)]
+    
+    # Only update values, not the input field
+    preset_dropdown['values'] = matches if matches else all_labels
+
+    # Open the dropdown when there's text input
+    if typed:
+        preset_dropdown.event_generate('<Down>')  # Simulate the dropdown open event
+
+update_timer = None
+
+def on_user_type(*args):
+    global update_timer
+    if update_timer:
+        root.after_cancel(update_timer)
+
+    def delayed():
+        on_dropdown_change()
+    
+    update_timer = root.after(200, delayed)
+
+preset_var.trace_add("write", on_user_type)
+
+# Let user type freely without auto-overwriting input
+def on_key_press(event):
+    if event.keysym in ("BackSpace", "Delete"):
+        preset_dropdown['values'] = all_labels  # Reset dropdown if clearing
+    return
+
+preset_dropdown.bind("<Key>", on_key_press)
+
+# Layout stretch
+root.grid_columnconfigure(3, weight=1)
+root.grid_rowconfigure(1, weight=1)
+
 root.mainloop()
