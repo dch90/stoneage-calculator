@@ -55,7 +55,7 @@ B = generate_signed_combinations()
 
 def pet_calculate(i_base, i_hp, i_at, i_df, i_sp):
     base = [i_hp, i_at, i_df, i_sp]  
-    print(f"Calculating for Stats: {i_base}, {base}")
+
     # New structure: derived stat -> set of modifiers
     derived_to_modifiers = defaultdict(set)
 
