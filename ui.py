@@ -21,18 +21,22 @@ root = tk.Tk()
 root.title("StoneAge Classic - Level 1 Pet Base Distribution")
 
 # Dropdown logic
+# Dropdown above inputs
+preset_label = tk.Label(root, text="페트 선택:")
+preset_label.grid(row=1, column=0, padx=10, pady=10, sticky="w")
+
 preset_var = tk.StringVar()
 preset_dropdown = ttk.Combobox(root, textvariable=preset_var)
 preset_dropdown['values'] = all_labels
-preset_dropdown.grid(row=0, column=1, columnspan=2, padx=10, pady=10, sticky="ew")
+preset_dropdown.grid(row=1, column=1, columnspan=2, padx=10, pady=10, sticky="ew")
 
 # Input labels and fields
 labels = ['초기계수', '체', '공', '방', '순']
 entries = []
 for i in range(5):
-    tk.Label(root, text=labels[i]).grid(row=i + 1, column=0, padx=10, pady=5, sticky="e")
+    tk.Label(root, text=labels[i]).grid(row=i + 2, column=0, padx=10, pady=5, sticky="e")
     entry = tk.Entry(root)
-    entry.grid(row=i + 1, column=1, padx=10, pady=5)
+    entry.grid(row=i + 2, column=1, padx=10, pady=5)
     entries.append(entry)
 
 # Result display
@@ -82,19 +86,12 @@ def on_dropdown_change(event=None):
     if typed:
         preset_dropdown.event_generate('<Down>')  # Simulate the dropdown open event
 
-update_timer = None
+# Trigger the autocomplete on "Enter" key press
+def on_enter_key(event):
+    on_dropdown_change()  # Trigger autocomplete functionality when "Enter" is pressed
 
-def on_user_type(*args):
-    global update_timer
-    if update_timer:
-        root.after_cancel(update_timer)
-
-    def delayed():
-        on_dropdown_change()
-    
-    update_timer = root.after(200, delayed)
-
-preset_var.trace_add("write", on_user_type)
+# Bind the "Enter" key to trigger the autocomplete
+root.bind("<Return>", on_enter_key)
 
 # Let user type freely without auto-overwriting input
 def on_key_press(event):
@@ -105,7 +102,7 @@ def on_key_press(event):
 preset_dropdown.bind("<Key>", on_key_press)
 
 # Layout stretch
-root.grid_columnconfigure(3, weight=1)
-root.grid_rowconfigure(1, weight=1)
+root.grid_columnconfigure(3, weight=0)
+root.grid_rowconfigure(1, weight=0)
 
 root.mainloop()
