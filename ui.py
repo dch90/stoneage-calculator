@@ -111,9 +111,7 @@ class PetCalculatorApp(QWidget):
         self.search_box.setFocus()
 
     def on_dropdown_select(self, text):
-        print(f"calculating for {text}")
         if text in preset_data:
-            print(preset_data[text])
             for i in range(5):
                 self.entries[i].setText(str(preset_data[text][i]))
             values = [int(entry.text()) for entry in self.entries]
