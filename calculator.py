@@ -75,6 +75,11 @@ def pet_calculate(i_base, i_hp, i_at, i_df, i_sp):
             per_dict[stat] = round((1 / len(b_mods)) * 100, 2)
     return per_dict
 
+def represent_s_pet(i_base, i_hp, i_at, i_df, i_sp):
+    base = [x + 4.5 for x in [i_hp, i_at, i_df, i_sp]]
+    stat = compute_derived(base, i_base)
+    return f"{stat[0]} {stat[1]} {stat[2]} {stat[3]}"
+
 def formatted_distribution(distribution):
     return_str = ""
     for stat, per in sorted(distribution.items(), key=lambda x: x[1], reverse=True):
