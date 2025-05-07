@@ -39,8 +39,8 @@ def compute_derived(s, i_base):
     scaled = [x * i_base / 100 for x in s]
 
     hp = scaled[0] * 4 + scaled[1] + scaled[2] + scaled[3]
-    attack = scaled[0] / 10 + scaled[1] + scaled[2] / 10 + scaled[3] / 10
-    defense = scaled[0] / 10 + scaled[1] / 10 + scaled[2] + scaled[3] / 10
+    attack = scaled[0] * 0.1 + scaled[1] + scaled[2] * 0.1 + scaled[3] * 0.05
+    defense = scaled[0] * 0.1 + scaled[1] * 0.1 + scaled[2] + scaled[3] * 0.05
     speed = scaled[3]
 
     return (
