@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QLineEdit, QTextEdit,
     QVBoxLayout, QHBoxLayout, QPushButton, QComboBox
 )
-from PySide6.QtGui import QShortcut, QKeySequence, QTextCharFormat, QColor, QTextCursor
+from PySide6.QtGui import QShortcut, QKeySequence, QTextCharFormat, QColor, QTextCursor, QMovie
 from PySide6.QtCore import Qt
 
 from calculator import pet_calculate, formatted_distribution, represent_s_pet
@@ -42,6 +42,17 @@ class PetCalculatorApp(QWidget):
         dropdown_layout.addWidget(dropdown_label)
         dropdown_layout.addWidget(self.dropdown)
         layout.addLayout(dropdown_layout)
+
+        # Image box
+        self.image_label = QLabel()
+        self.image_label.setFixedSize(200, 200)  # Adjust size as needed
+        self.image_label.setScaledContents(False)
+
+        self.image_layout = QHBoxLayout()
+        self.image_layout.addStretch()                 # Left spacer
+        self.image_layout.addWidget(self.image_label)  # Your image (GIF) label
+        self.image_layout.addStretch()                 # Right spacer
+        layout.addLayout(self.image_layout)            # Add to main layout
 
         # Entry fields
         self.entries = []
@@ -92,6 +103,7 @@ class PetCalculatorApp(QWidget):
             lambda: self.on_dropdown_select(self.dropdown.currentText())
         )
 
+        self.resize(500, 800)
         self.setLayout(layout)
 
     def focus_search_box(self):
@@ -107,11 +119,24 @@ class PetCalculatorApp(QWidget):
             values = [int(entry.text()) for entry in self.entries]
             self.represent_box.setText(str(represent_s_pet(*values)))
             self.calculate()
+            
+            # Update image
+            image_path = f"Picture/{text}.gif"
+            image_gif = QMovie(image_path)
+            image_gif.setScaledSize(self.image_label.size()/ 1.5)
+
+            if not image_gif.isValid():
+                self.image_label.clear()
+            else:
+                self.image_label.setMovie(image_gif)
+                image_gif.start()
+
         else:
             self.result_box.setPlainText("")
             for i in range(5):
                 self.entries[i].setText("")
             self.represent_box.setText("")
+            self.image_label.clear()
 
     def highlight_matches(self, search_term):
         cursor = self.result_box.textCursor()
