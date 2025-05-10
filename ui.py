@@ -171,7 +171,7 @@ class PetCalculatorApp(QWidget):
     def calculate(self):
         try:
             values = [int(entry.text()) for entry in self.entries]
-            self.result_box.setPlainText(pet_calculate(*values))
+            self.result_box.setPlainText(pet_calculate(*values, max_only=True))
         except ValueError:
             self.result_box.setPlainText("잘못된 입력")
 

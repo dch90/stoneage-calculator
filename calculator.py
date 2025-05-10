@@ -95,7 +95,14 @@ def calculate_chances(stat_to_base):
                     (stat_to_base[stat][(2,2,2,2)] / sum(stat_to_base[stat].values()))*100,
                     2
                 ),
-                "encounter_chance": round((stat_cases_count / all_possible_cases_count) * 100, 5)
+                "encounter_chance": round((stat_cases_count / all_possible_cases_count) * 100, 5),
+                "max": True
+            }
+        else:
+            per_dict[stat] = {
+                "base_chance": 0,
+                "encounter_chance": round((stat_cases_count / all_possible_cases_count) * 100, 5),
+                "max": False
             }
     return per_dict
 
@@ -104,16 +111,21 @@ def represent_s_pet(i_base, i_hp, i_at, i_df, i_sp):
     stat = compute_derived(base, i_base)
     return f"{stat[0]} {stat[1]} {stat[2]} {stat[3]}"
 
-def formatted_distribution(per_dict):
+def formatted_distribution(per_dict, max_only=True):
     return_str = ""
     for stat, per_d in sorted(per_dict.items(), key=lambda x: x[1]["base_chance"], reverse=True):
-        return_str += f"{stat[0]} {stat[1]} {stat[2]} {stat[3]}:\n"
-        return_str += f"    맥스 베이스일 확률: {per_d['base_chance']}%\n"
-        return_str += f"    해당 스탯일 확률: {per_d['encounter_chance']}%\n"
-        
+        if max_only is False:
+            return_str += f"{stat[0]} {stat[1]} {stat[2]} {stat[3]}:\n"
+            return_str += f"    맥스 베이스일 확률: {per_d['base_chance']}%\n"
+            return_str += f"    해당 스탯일 확률: {per_d['encounter_chance']}%\n"
+        elif per_d["max"] is max_only:
+            return_str += f"{stat[0]} {stat[1]} {stat[2]} {stat[3]}:\n"
+            return_str += f"    맥스 베이스일 확률: {per_d['base_chance']}%\n"
+            return_str += f"    해당 스탯일 확률: {per_d['encounter_chance']}%\n"
+
     return return_str
 
-def pet_calculate(i_base, i_hp, i_at, i_df, i_sp):
+def pet_calculate(i_base, i_hp, i_at, i_df, i_sp, max_only=True):
     distribution_dict = get_distribution_dict(i_base, i_hp, i_at, i_df, i_sp)
     chance_dict = calculate_chances(distribution_dict)
-    return formatted_distribution(chance_dict)
+    return formatted_distribution(chance_dict, max_only)
