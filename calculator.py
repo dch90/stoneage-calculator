@@ -24,6 +24,11 @@ Features:
 from itertools import product
 from collections import defaultdict
 
+DEBUG=False
+
+def print_debug(s):
+    if DEBUG is True:
+        print(s)
 
 def generate_distribution_combinations(total=10, buckets=4):
     return [combo for combo in product(range(total + 1), repeat=buckets) if sum(combo) == total]
@@ -57,22 +62,23 @@ def pet_calculate(i_base, i_hp, i_at, i_df, i_sp):
     base = [i_hp, i_at, i_df, i_sp]  
 
     # New structure: derived stat -> set of modifiers
-    derived_to_modifiers = defaultdict(set)
+    derived_to_modifiers = defaultdict(lambda: defaultdict(int))
 
     # For each modifier, track which stats it's already linked to (optional, avoids extra work)
     for mod in B:
-        seen_stats = set()
         for dist in A:
             s = combine_stats(base, dist, mod)
             derived = compute_derived(s, i_base)
-            if derived not in seen_stats:
-                derived_to_modifiers[derived].add(mod)
-                seen_stats.add(derived)
-
-    per_dict = defaultdict(int)
-    for stat, b_mods in derived_to_modifiers.items():
-        if (2,2,2,2) in b_mods:
-            per_dict[stat] = round((1 / len(b_mods)) * 100, 2)
+            derived_to_modifiers[derived][mod] += 1
+    # return derived_to_modifiers
+    per_dict = defaultdict(float)
+    for stat in derived_to_modifiers.keys():
+        if (2,2,2,2) in derived_to_modifiers[stat].keys():
+            print_debug(stat)
+            per_dict[stat] = round(
+                (derived_to_modifiers[stat][(2,2,2,2)] / sum(derived_to_modifiers[stat].values()))*100,
+                2
+            )
     return per_dict
 
 def represent_s_pet(i_base, i_hp, i_at, i_df, i_sp):
