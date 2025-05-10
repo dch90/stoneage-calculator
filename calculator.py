@@ -58,7 +58,7 @@ def compute_derived(s, i_base):
 A = generate_distribution_combinations()
 B = generate_signed_combinations()
 
-def pet_calculate(i_base, i_hp, i_at, i_df, i_sp):
+def get_distribution_dict(i_base, i_hp, i_at, i_df, i_sp):
     base = [i_hp, i_at, i_df, i_sp]  
 
     # New structure: derived stat -> set of modifiers
@@ -70,15 +70,33 @@ def pet_calculate(i_base, i_hp, i_at, i_df, i_sp):
             s = combine_stats(base, dist, mod)
             derived = compute_derived(s, i_base)
             derived_to_modifiers[derived][mod] += 1
-    # return derived_to_modifiers
-    per_dict = defaultdict(float)
-    for stat in derived_to_modifiers.keys():
-        if (2,2,2,2) in derived_to_modifiers[stat].keys():
+    return derived_to_modifiers
+
+def get_all_case_count(stat_to_base):
+    return sum(
+        val for inner in stat_to_base.values()
+        for val in inner.values()
+    )
+
+def get_specific_case_count(stat_to_base, key):
+    return sum(
+        stat_to_base[key].values()
+    )
+
+def calculate_chances(stat_to_base):
+    all_possible_cases_count = get_all_case_count(stat_to_base)
+    per_dict = defaultdict(lambda: defaultdict(float))
+    for stat in stat_to_base.keys():
+        stat_cases_count = get_specific_case_count(stat_to_base, stat)
+        if (2,2,2,2) in stat_to_base[stat].keys():
             print_debug(stat)
-            per_dict[stat] = round(
-                (derived_to_modifiers[stat][(2,2,2,2)] / sum(derived_to_modifiers[stat].values()))*100,
-                2
-            )
+            per_dict[stat] = {
+                "base_chance": round(
+                    (stat_to_base[stat][(2,2,2,2)] / sum(stat_to_base[stat].values()))*100,
+                    2
+                ),
+                "encounter_chance": round((stat_cases_count / all_possible_cases_count) * 100, 5)
+            }
     return per_dict
 
 def represent_s_pet(i_base, i_hp, i_at, i_df, i_sp):
@@ -86,8 +104,16 @@ def represent_s_pet(i_base, i_hp, i_at, i_df, i_sp):
     stat = compute_derived(base, i_base)
     return f"{stat[0]} {stat[1]} {stat[2]} {stat[3]}"
 
-def formatted_distribution(distribution):
+def formatted_distribution(per_dict):
     return_str = ""
-    for stat, per in sorted(distribution.items(), key=lambda x: x[1], reverse=True):
-        return_str += f"{stat[0]} {stat[1]} {stat[2]} {stat[3]}: {per}%\n"
+    for stat, per_d in sorted(per_dict.items(), key=lambda x: x[1]["base_chance"], reverse=True):
+        return_str += f"{stat[0]} {stat[1]} {stat[2]} {stat[3]}:\n"
+        return_str += f"    맥스 베이스일 확률: {per_d['base_chance']}%\n"
+        return_str += f"    해당 스탯일 확률: {per_d['encounter_chance']}%\n"
+        
     return return_str
+
+def pet_calculate(i_base, i_hp, i_at, i_df, i_sp):
+    distribution_dict = get_distribution_dict(i_base, i_hp, i_at, i_df, i_sp)
+    chance_dict = calculate_chances(distribution_dict)
+    return formatted_distribution(chance_dict)

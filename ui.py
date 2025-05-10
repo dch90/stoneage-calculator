@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QShortcut, QKeySequence, QTextCharFormat, QColor, QTextCursor, QMovie
 from PySide6.QtCore import Qt
 
-from calculator import pet_calculate, formatted_distribution, represent_s_pet
+from calculator import pet_calculate, represent_s_pet
 
 # Load presets
 preset_data = {}
@@ -171,8 +171,7 @@ class PetCalculatorApp(QWidget):
     def calculate(self):
         try:
             values = [int(entry.text()) for entry in self.entries]
-            result = pet_calculate(*values)
-            self.result_box.setPlainText(formatted_distribution(result))
+            self.result_box.setPlainText(pet_calculate(*values))
         except ValueError:
             self.result_box.setPlainText("잘못된 입력")
 
