@@ -109,17 +109,17 @@ def calculate_chances(stat_to_base):
 def represent_s_pet(i_base, i_hp, i_at, i_df, i_sp):
     base = [x + 4.5 for x in [i_hp, i_at, i_df, i_sp]]
     stat = compute_derived(base, i_base)
-    return f"{stat[0]} {stat[1]} {stat[2]} {stat[3]}"
+    return f"{stat[1]} {stat[2]} {stat[3]} {stat[0]}"
 
 def formatted_distribution(per_dict, max_only=True, sort_key="base_chance"):
     return_str = ""
     for stat, per_d in sorted(per_dict.items(), key=lambda x: x[1][sort_key], reverse=True):
         if max_only is False:
-            return_str += f"{stat[0]} {stat[1]} {stat[2]} {stat[3]}:\n"
+            return_str += f"{stat[1]} {stat[2]} {stat[3]} {stat[0]}:\n"
             return_str += f"    맥스 베이스일 확률: {per_d['base_chance']}%\n"
             return_str += f"    포획시 해당 스탯일 확률: {per_d['encounter_chance']}%\n"
         elif per_d["max"] is max_only:
-            return_str += f"{stat[0]} {stat[1]} {stat[2]} {stat[3]}:\n"
+            return_str += f"{stat[1]} {stat[2]} {stat[3]} {stat[0]}:\n"
             return_str += f"    맥스 베이스일 확률: {per_d['base_chance']}%\n"
             return_str += f"    포획시 해당 스탯일 확률: {per_d['encounter_chance']}%\n"
 
