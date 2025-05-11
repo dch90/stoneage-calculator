@@ -108,9 +108,16 @@ class PetCalculatorApp(QWidget):
         layout.addWidget(calc_btn)
 
         # Sorting
-        self.switch = SwitchButton("맥스 베이스 초기만 보기")
-        self.switch.stateChanged.connect(self.calculate)
-        layout.addWidget(self.switch)
+        # Base sort
+        self.filter_switch = SwitchButton("맥스 베이스 초기만 보기")
+        self.filter_switch.stateChanged.connect(self.calculate)
+        layout.addWidget(self.filter_switch)
+
+        # Encounter sort
+        self.sort_switch = SwitchButton("베이스 확률 정렬")
+        self.sort_switch.setChecked(True)
+        self.sort_switch.stateChanged.connect(self.calculate)
+        layout.addWidget(self.sort_switch)
 
         # Search functionality
         self.search_box = QLineEdit()
@@ -195,7 +202,13 @@ class PetCalculatorApp(QWidget):
     def calculate(self):
         try:
             values = [int(entry.text()) for entry in self.entries]
-            self.result_box.setPlainText(pet_calculate(*values, max_only=self.switch.isChecked()))
+            self.result_box.setPlainText(
+                pet_calculate(
+                    *values,
+                    max_only=self.filter_switch.isChecked(),
+                    sort_key="base_chance" if self.sort_switch.isChecked() else "encounter_chance"
+                )
+            )
         except ValueError:
             self.result_box.setPlainText("잘못된 입력")
 

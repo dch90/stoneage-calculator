@@ -111,9 +111,9 @@ def represent_s_pet(i_base, i_hp, i_at, i_df, i_sp):
     stat = compute_derived(base, i_base)
     return f"{stat[0]} {stat[1]} {stat[2]} {stat[3]}"
 
-def formatted_distribution(per_dict, max_only=True):
+def formatted_distribution(per_dict, max_only=True, sort_key="base_chance"):
     return_str = ""
-    for stat, per_d in sorted(per_dict.items(), key=lambda x: x[1]["base_chance"], reverse=True):
+    for stat, per_d in sorted(per_dict.items(), key=lambda x: x[1][sort_key], reverse=True):
         if max_only is False:
             return_str += f"{stat[0]} {stat[1]} {stat[2]} {stat[3]}:\n"
             return_str += f"    맥스 베이스일 확률: {per_d['base_chance']}%\n"
@@ -125,7 +125,7 @@ def formatted_distribution(per_dict, max_only=True):
 
     return return_str
 
-def pet_calculate(i_base, i_hp, i_at, i_df, i_sp, max_only=True):
+def pet_calculate(i_base, i_hp, i_at, i_df, i_sp, max_only=True, sort_key="base_chance"):
     distribution_dict = get_distribution_dict(i_base, i_hp, i_at, i_df, i_sp)
     chance_dict = calculate_chances(distribution_dict)
-    return formatted_distribution(chance_dict, max_only)
+    return formatted_distribution(chance_dict, max_only, sort_key)
