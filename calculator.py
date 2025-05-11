@@ -117,11 +117,11 @@ def formatted_distribution(per_dict, max_only=True):
         if max_only is False:
             return_str += f"{stat[0]} {stat[1]} {stat[2]} {stat[3]}:\n"
             return_str += f"    맥스 베이스일 확률: {per_d['base_chance']}%\n"
-            return_str += f"    해당 스탯일 확률: {per_d['encounter_chance']}%\n"
+            return_str += f"    포획시 해당 스탯일 확률: {per_d['encounter_chance']}%\n"
         elif per_d["max"] is max_only:
             return_str += f"{stat[0]} {stat[1]} {stat[2]} {stat[3]}:\n"
             return_str += f"    맥스 베이스일 확률: {per_d['base_chance']}%\n"
-            return_str += f"    해당 스탯일 확률: {per_d['encounter_chance']}%\n"
+            return_str += f"    포획시 해당 스탯일 확률: {per_d['encounter_chance']}%\n"
 
     return return_str
 

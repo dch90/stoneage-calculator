@@ -2,7 +2,7 @@
 import sys
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QLineEdit, QTextEdit,
-    QVBoxLayout, QHBoxLayout, QPushButton, QComboBox
+    QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QCheckBox
 )
 from PySide6.QtGui import QShortcut, QKeySequence, QTextCharFormat, QColor, QTextCursor, QMovie
 from PySide6.QtCore import Qt
@@ -21,10 +21,29 @@ with open("data.txt", encoding="utf-8") as f:
 
 all_labels = list(preset_data.keys())
 
+class SwitchButton(QCheckBox):
+    def __init__(self, label="", parent=None):
+        super().__init__(label, parent)
+        self.setTristate(False)
+        self.setStyleSheet("""
+            QCheckBox::indicator {
+                width: 20px;
+                height: 20px;
+            }
+            QCheckBox::indicator:unchecked {
+                background-color: #ccc;
+                border-radius: 10px;
+            }
+            QCheckBox::indicator:checked {
+                background-color: #87CEEB;
+                border-radius: 10px;
+            }
+        """)
+
 class PetCalculatorApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("스톤에이지 클래식서버 - 1레벨 페트 S급 확률 계산기")
+        self.setWindowTitle("스톤에이지 클래식서버 - 1레벨 페트 확률 계산기")
         self.init_ui()
 
     def init_ui(self):
@@ -76,7 +95,7 @@ class PetCalculatorApp(QWidget):
         layout.addLayout(row)
 
         # Result label
-        layout.addWidget(QLabel("레벨1 페트가 S급일 확률:"))
+        layout.addWidget(QLabel("레벨1 페트 확률 결과:"))
 
         # Result box
         self.result_box = QTextEdit()
@@ -87,6 +106,11 @@ class PetCalculatorApp(QWidget):
         calc_btn = QPushButton("계산")
         calc_btn.clicked.connect(self.calculate)
         layout.addWidget(calc_btn)
+
+        # Sorting
+        self.switch = SwitchButton("맥스 베이스 초기만 보기")
+        self.switch.stateChanged.connect(self.calculate)
+        layout.addWidget(self.switch)
 
         # Search functionality
         self.search_box = QLineEdit()
@@ -171,7 +195,7 @@ class PetCalculatorApp(QWidget):
     def calculate(self):
         try:
             values = [int(entry.text()) for entry in self.entries]
-            self.result_box.setPlainText(pet_calculate(*values, max_only=True))
+            self.result_box.setPlainText(pet_calculate(*values, max_only=self.switch.isChecked()))
         except ValueError:
             self.result_box.setPlainText("잘못된 입력")
 
