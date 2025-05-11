@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QLineEdit, QTextEdit,
     QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QCheckBox
 )
-from PySide6.QtGui import QShortcut, QKeySequence, QTextCharFormat, QColor, QTextCursor, QMovie
+from PySide6.QtGui import QShortcut, QKeySequence, QTextCharFormat, QColor, QTextCursor, QMovie, QIcon
 from PySide6.QtCore import Qt
 
 from calculator import pet_calculate, represent_s_pet
@@ -44,6 +44,7 @@ class PetCalculatorApp(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("스톤에이지 클래식서버 - 1레벨 페트 확률 계산기")
+        self.setWindowIcon(QIcon("icon.ico"))
         self.init_ui()
 
     def init_ui(self):
