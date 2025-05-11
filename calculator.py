@@ -93,7 +93,7 @@ def calculate_chances(stat_to_base):
             per_dict[stat] = {
                 "base_chance": round(
                     (stat_to_base[stat][(2,2,2,2)] / sum(stat_to_base[stat].values()))*100,
-                    2
+                    5
                 ),
                 "encounter_chance": round((stat_cases_count / all_possible_cases_count) * 100, 5),
                 "max": True
