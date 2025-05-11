@@ -93,7 +93,7 @@ def calculate_chances(stat_to_base):
             per_dict[stat] = {
                 "base_chance": round(
                     (stat_to_base[stat][(2,2,2,2)] / sum(stat_to_base[stat].values()))*100,
-                    5
+                    3
                 ),
                 "encounter_chance": round((stat_cases_count / all_possible_cases_count) * 100, 5),
                 "max": True
@@ -117,11 +117,11 @@ def formatted_distribution(per_dict, max_only=True, sort_key="base_chance"):
         if max_only is False:
             return_str += f"{stat[1]} {stat[2]} {stat[3]} {stat[0]}:\n"
             return_str += f"    맥스 베이스일 확률: {per_d['base_chance']}%\n"
-            return_str += f"    포획시 해당 스탯일 확률: {per_d['encounter_chance']}%\n"
+            return_str += f"    페트 등장/출현 확률: {per_d['encounter_chance']}%\n"
         elif per_d["max"] is max_only:
             return_str += f"{stat[1]} {stat[2]} {stat[3]} {stat[0]}:\n"
             return_str += f"    맥스 베이스일 확률: {per_d['base_chance']}%\n"
-            return_str += f"    포획시 해당 스탯일 확률: {per_d['encounter_chance']}%\n"
+            return_str += f"    페트 등장/출현 확률: {per_d['encounter_chance']}%\n"
 
     return return_str
 
