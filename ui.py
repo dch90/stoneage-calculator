@@ -44,7 +44,7 @@ class PetCalculatorApp(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("스톤에이지 클래식서버 - 1레벨 페트 확률 계산기")
-        self.setWindowIcon(QIcon("icon.ico"))
+        self.setWindowIcon(QIcon("아이콘.ico"))
         self.init_ui()
 
     def init_ui(self):
@@ -55,6 +55,9 @@ class PetCalculatorApp(QWidget):
         dropdown_label = QLabel("페트 선택:")
         self.dropdown = QComboBox()
         self.dropdown.setEditable(True)
+        self.dropdown.addItem("페트 고르기")
+        self.dropdown.setItemData(0, 0, role=Qt.UserRole - 1)  # Make the placeholder unselectable
+        self.dropdown.lineEdit().selectAll()
         self.dropdown.addItems(all_labels)
         self.dropdown.setInsertPolicy(QComboBox.NoInsert)
         self.dropdown.currentTextChanged.connect(self.on_dropdown_select)
