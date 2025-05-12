@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QCheckBox
 )
 from PySide6.QtGui import QShortcut, QKeySequence, QTextCharFormat, QColor, QTextCursor, QMovie, QIcon
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer, QEvent
 
 from calculator import pet_calculate, represent_s_pet
 
@@ -60,7 +60,12 @@ class PetCalculatorApp(QWidget):
         self.dropdown.lineEdit().selectAll()
         self.dropdown.addItems(all_labels)
         self.dropdown.setInsertPolicy(QComboBox.NoInsert)
-        self.dropdown.currentTextChanged.connect(self.on_dropdown_select)
+        self.dropdown.currentTextChanged.connect(self.dropdown_schedule_search)
+        
+        # Search Timer
+        self.dropdown_search_timer = QTimer()
+        self.dropdown_search_timer.setSingleShot(True)
+        self.dropdown_search_timer.timeout.connect(lambda: self.on_dropdown_select(self.dropdown.lineEdit().text()))
 
         dropdown_layout.addWidget(dropdown_label)
         dropdown_layout.addWidget(self.dropdown)
@@ -126,8 +131,13 @@ class PetCalculatorApp(QWidget):
         # Search functionality
         self.search_box = QLineEdit()
         self.search_box.setPlaceholderText("Ctrl+F 눌러 검색...")
-        self.search_box.textChanged.connect(self.highlight_matches)
+        self.search_box.textChanged.connect(self.schedule_search)
         layout.addWidget(self.search_box)
+
+        # Search Timer
+        self.result_search_timer = QTimer()
+        self.result_search_timer.setSingleShot(True)
+        self.result_search_timer.timeout.connect(lambda: self.highlight_matches(self.search_box.text()))
 
         # Add Ctrl+F hotkey for search using QShortcut
         search_shortcut = QShortcut(Qt.CTRL | Qt.Key_F, self)
@@ -143,8 +153,8 @@ class PetCalculatorApp(QWidget):
 
     def focus_search_box(self):
         """Focus on the search text box when Ctrl+F is pressed."""
-        self.search_box.selectAll()
         self.search_box.setFocus()
+        self.search_box.selectAll()
 
     def on_dropdown_select(self, text):
         if text in preset_data:
@@ -172,8 +182,14 @@ class PetCalculatorApp(QWidget):
             self.represent_box.setText("")
             self.image_label.clear()
 
+    def dropdown_schedule_search(self):
+        self.dropdown_search_timer.start(100)
+
+    def schedule_search(self):
+        self.result_search_timer.start(200)
+
     def highlight_matches(self, search_term):
-        cursor = self.result_box.textCursor()
+        # cursor = self.result_box.textCursor()
         format = QTextCharFormat()
         format.setBackground(QColor("yellow"))  # Highlight color
 
