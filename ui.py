@@ -140,6 +140,7 @@ class PetCalculatorApp(QWidget):
 
     def focus_search_box(self):
         """Focus on the search text box when Ctrl+F is pressed."""
+        self.search_box.selectAll()
         self.search_box.setFocus()
 
     def on_dropdown_select(self, text):
