@@ -148,12 +148,14 @@ def formatted_distribution(per_dict, max_only=True, sort_key="base_chance"):
     for stat, per_d in sorted(per_dict.items(), key=lambda x: x[1][sort_key], reverse=True):
         if max_only is False:
             return_str += f"{stat[1]}{stat[2]}{stat[3]}{stat[0]}- {stat[1]} {stat[2]} {stat[3]} {stat[0]}:\n"
-            return_str += f"    맥스 베이스일 확률: {round_to_significant(per_d['base_chance'] * 100)}%\n"
+            return_str += f"    맥스 베이스일 확률: {round_to_significant(per_d['base_chance'] * 100)}%"
+            return_str += f" ({one_in_x_korean(per_d['base_chance'])} 중 1)\n" if per_d['base_chance'] < 1 else "\n"
             return_str += f"    페트 등장/출현 확률: {round_to_significant(per_d['encounter_chance'] * 100)}%"
             return_str += f" ({one_in_x_korean(per_d['encounter_chance'])} 중 1)\n" if per_d['encounter_chance'] < 1 else "\n"
         elif per_d["max"] is max_only:
             return_str += f"{stat[1]}{stat[2]}{stat[3]}{stat[0]} - {stat[1]} {stat[2]} {stat[3]} {stat[0]}:\n"
-            return_str += f"    맥스 베이스일 확률: {round_to_significant(per_d['base_chance'] * 100)}%\n"
+            return_str += f"    맥스 베이스일 확률: {round_to_significant(per_d['base_chance'] * 100)}%"
+            return_str += f" ({one_in_x_korean(per_d['base_chance'])} 중 1)\n" if per_d['base_chance'] < 1 else "\n"
             return_str += f"    페트 등장/출현 확률: {round_to_significant(per_d['encounter_chance'] * 100)}%"
             return_str += f" ({one_in_x_korean(per_d['encounter_chance'])} 중 1)\n" if per_d['encounter_chance'] < 1 else "\n"
     return return_str
