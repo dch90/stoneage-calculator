@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QShortcut, QKeySequence, QTextCharFormat, QColor, QTextCursor, QMovie, QIcon
 from PySide6.QtCore import Qt, QTimer, QEvent
 
-from calculator import pet_calculate, represent_s_pet
+from calculator import get_distribution_dict, pet_calculate, represent_s_pet
 
 # Load presets
 preset_data = {}
@@ -119,6 +119,7 @@ class PetCalculatorApp(QWidget):
         # Sorting
         # Base sort
         self.filter_switch = SwitchButton("맥스 베이스 초기만 보기")
+        self.filter_switch.setChecked(True)
         self.filter_switch.stateChanged.connect(self.calculate)
         layout.addWidget(self.filter_switch)
 
@@ -189,7 +190,6 @@ class PetCalculatorApp(QWidget):
         self.result_search_timer.start(200)
 
     def highlight_matches(self, search_term):
-        # cursor = self.result_box.textCursor()
         format = QTextCharFormat()
         format.setBackground(QColor("yellow"))  # Highlight color
 
@@ -201,16 +201,12 @@ class PetCalculatorApp(QWidget):
         if not search_term:
             return
 
-        # Start at the beginning
         self.result_box.moveCursor(QTextCursor.Start)
-
-        # Search and highlight matches
         match_cursor = self.result_box.textCursor()
         found_first = False
 
         while True:
             match_cursor = self.result_box.document().find(search_term, match_cursor)
-
             if match_cursor.isNull():
                 break
 
@@ -218,14 +214,25 @@ class PetCalculatorApp(QWidget):
 
             if not found_first:
                 self.result_box.setTextCursor(match_cursor)
+                self.result_box.ensureCursorVisible()
+
+                # Scroll so that matched line is at the top
+                layout = self.result_box.document().documentLayout()
+                rect = layout.blockBoundingRect(match_cursor.block())
+                top_position = rect.translated(0, -self.result_box.viewport().rect().top()).top()
+
+                scroll_bar = self.result_box.verticalScrollBar()
+                scroll_bar.setValue(int(top_position))
+
                 found_first = True
     
     def calculate(self):
         try:
             values = [int(entry.text()) for entry in self.entries]
+            distribution = get_distribution_dict(*values)
             self.result_box.setPlainText(
                 pet_calculate(
-                    *values,
+                    distribution,
                     max_only=self.filter_switch.isChecked(),
                     sort_key="base_chance" if self.sort_switch.isChecked() else "encounter_chance"
                 )
