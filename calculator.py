@@ -149,18 +149,21 @@ def formatted_distribution(per_dict, max_only=True, sort_key="base_chance"):
         if max_only is False:
             return_str += f"{stat[1]}{stat[2]}{stat[3]}{stat[0]}- {stat[1]} {stat[2]} {stat[3]} {stat[0]}:\n"
             return_str += f"    맥스 베이스일 확률: {round_to_significant(per_d['base_chance'] * 100)}%"
-            return_str += f" ({one_in_x_korean(per_d['base_chance'])} 중 1)\n" if per_d['base_chance'] < 1 else "\n"
+            return_str += f" ({one_in_x_korean(per_d['base_chance'])} 중 1)\n" if 0 < per_d['base_chance'] < 0.01 else "\n"
             return_str += f"    페트 등장/출현 확률: {round_to_significant(per_d['encounter_chance'] * 100)}%"
-            return_str += f" ({one_in_x_korean(per_d['encounter_chance'])} 중 1)\n" if per_d['encounter_chance'] < 1 else "\n"
+            return_str += f" ({one_in_x_korean(per_d['encounter_chance'])} 중 1)\n" if 0 < per_d['encounter_chance'] < 0.01 else "\n"
         elif per_d["max"] is max_only:
             return_str += f"{stat[1]}{stat[2]}{stat[3]}{stat[0]} - {stat[1]} {stat[2]} {stat[3]} {stat[0]}:\n"
             return_str += f"    맥스 베이스일 확률: {round_to_significant(per_d['base_chance'] * 100)}%"
-            return_str += f" ({one_in_x_korean(per_d['base_chance'])} 중 1)\n" if per_d['base_chance'] < 1 else "\n"
+            return_str += f" ({one_in_x_korean(per_d['base_chance'])} 중 1)\n" if 0 < per_d['base_chance'] < 0.01 else "\n"
             return_str += f"    페트 등장/출현 확률: {round_to_significant(per_d['encounter_chance'] * 100)}%"
-            return_str += f" ({one_in_x_korean(per_d['encounter_chance'])} 중 1)\n" if per_d['encounter_chance'] < 1 else "\n"
+            return_str += f" ({one_in_x_korean(per_d['encounter_chance'])} 중 1)\n" if 0 < per_d['encounter_chance'] < 0.01 else "\n"
     return return_str
 
-def pet_calculate(distribution_dict, max_only=True, sort_key="base_chance"):
+def pet_calculate(distribution_dict):
     # distribution_dict = get_distribution_dict(i_base, i_hp, i_at, i_df, i_sp)
     chance_dict = calculate_chances(distribution_dict)
-    return formatted_distribution(chance_dict, max_only, sort_key)
+    return chance_dict
+
+def get_min_hp(distribution_dict, max_only=True):
+    return min(key[0] for key, value in distribution_dict.items() if value.get("max", False) is max_only)

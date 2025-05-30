@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QShortcut, QKeySequence, QTextCharFormat, QColor, QTextCursor, QMovie, QIcon
 from PySide6.QtCore import Qt, QTimer, QEvent
 
-from calculator import get_distribution_dict, pet_calculate, represent_s_pet
+from calculator import get_distribution_dict, pet_calculate, represent_s_pet, get_min_hp, formatted_distribution
 
 # Load presets
 preset_data = {}
@@ -103,6 +103,15 @@ class PetCalculatorApp(QWidget):
         row.addWidget(self.represent_box)
         layout.addLayout(row)
 
+        # minimum pet hp
+        row = QHBoxLayout()
+        label = QLabel("최소 체력")
+        self.min_hp_box = QLineEdit()
+        self.min_hp_box.setReadOnly(True)
+        row.addWidget(label)
+        row.addWidget(self.min_hp_box)
+        layout.addLayout(row)
+
         # Result label
         layout.addWidget(QLabel("레벨1 페트 확률 결과:"))
 
@@ -181,6 +190,7 @@ class PetCalculatorApp(QWidget):
             for i in range(5):
                 self.entries[i].setText("")
             self.represent_box.setText("")
+            self.min_hp_box.setText("")
             self.image_label.clear()
 
     def dropdown_schedule_search(self):
@@ -230,13 +240,16 @@ class PetCalculatorApp(QWidget):
         try:
             values = [int(entry.text()) for entry in self.entries]
             distribution = get_distribution_dict(*values)
+            calculated_chances = pet_calculate(distribution)
             self.result_box.setPlainText(
-                pet_calculate(
-                    distribution,
+                formatted_distribution(
+                    calculated_chances,
                     max_only=self.filter_switch.isChecked(),
                     sort_key="base_chance" if self.sort_switch.isChecked() else "encounter_chance"
                 )
             )
+
+            self.min_hp_box.setText(str(get_min_hp(calculated_chances)))
         except ValueError:
             self.result_box.setPlainText("잘못된 입력")
 
