@@ -1,1 +1,1 @@
-pyinstaller --onefile --noconsole --icon="C:\Users\chung\Desktop\stoneage\pet_calculator\아이콘.ico" --name 1렙페트확률계산기 .\ui.py
+pyinstaller --onefile --noconsole --icon="C:\Users\chung\Desktop\stoneage\pet_calculator\아이콘.ico" --name 1렙페트확률계산기 "C:\Users\chung\Desktop\stoneage\pet_calculator\ui.py"

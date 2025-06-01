@@ -1,5 +1,5 @@
-import calculator
+import pet_calculator
 
-dist = calculator.get_distribution_dict(21,26,31,21,29)
+dist = pet_calculator.get_distribution_dict(21,26,31,21,29)
 
-chance = calculator.pet_calculate(dist)
+chance = pet_calculator.pet_calculate(dist)

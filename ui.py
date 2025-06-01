@@ -2,24 +2,37 @@
 import sys
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QLineEdit, QTextEdit,
-    QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QCheckBox
+    QVBoxLayout, QHBoxLayout, QPushButton, QComboBox, QCheckBox,
+    QMainWindow, QTabWidget
 )
-from PySide6.QtGui import QShortcut, QKeySequence, QTextCharFormat, QColor, QTextCursor, QMovie, QIcon
-from PySide6.QtCore import Qt, QTimer, QEvent
+from PySide6.QtGui import QShortcut, QKeySequence, QTextCharFormat, QColor, QTextCursor, QMovie, QIcon, QIntValidator
+from PySide6.QtCore import Qt, QTimer
 
-from calculator import get_distribution_dict, pet_calculate, represent_s_pet, get_min_hp, formatted_distribution
+from pet_calculator import get_distribution_dict, pet_calculate, represent_s_pet, get_min_hp, formatted_distribution
+from exp_calculator import calculate_exp_buff, calculate_time_for_lvl, format_result
 
 # Load presets
-preset_data = {}
-with open("data.txt", encoding="utf-8") as f:
+pet_preset_data = {}
+with open("pet_data.txt", encoding="utf-8") as f:
     for line in f:
         parts = line.strip().split("\t")
         if len(parts) == 6:
             key = parts[0]
             values = list(map(int, parts[1:]))
-            preset_data[key] = values
+            pet_preset_data[key] = values
 
-all_labels = list(preset_data.keys())
+all_pet_labels = list(pet_preset_data.keys())
+
+hunt_preset_data = {}
+with open("hunt_data.txt", encoding="utf-8") as f:
+    for line in f:
+        parts = line.strip().split("\t")
+        if len(parts) == 2:
+            hunt_area = parts[0]
+            exp = parts[1]
+            hunt_preset_data[hunt_area] = exp
+
+all_hunt_labels = list(hunt_preset_data.keys())
 
 class SwitchButton(QCheckBox):
     def __init__(self, label="", parent=None):
@@ -43,8 +56,6 @@ class SwitchButton(QCheckBox):
 class PetCalculatorApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("스톤에이지 클래식서버 - 1레벨 페트 확률 계산기")
-        self.setWindowIcon(QIcon("아이콘.ico"))
         self.init_ui()
 
     def init_ui(self):
@@ -58,7 +69,7 @@ class PetCalculatorApp(QWidget):
         self.dropdown.addItem("페트 고르기")
         self.dropdown.setItemData(0, 0, role=Qt.UserRole - 1)  # Make the placeholder unselectable
         self.dropdown.lineEdit().selectAll()
-        self.dropdown.addItems(all_labels)
+        self.dropdown.addItems(all_pet_labels)
         self.dropdown.setInsertPolicy(QComboBox.NoInsert)
         self.dropdown.currentTextChanged.connect(self.dropdown_schedule_search)
         
@@ -158,7 +169,6 @@ class PetCalculatorApp(QWidget):
             lambda: self.on_dropdown_select(self.dropdown.currentText())
         )
 
-        self.resize(500, 800)
         self.setLayout(layout)
 
     def focus_search_box(self):
@@ -167,9 +177,9 @@ class PetCalculatorApp(QWidget):
         self.search_box.selectAll()
 
     def on_dropdown_select(self, text):
-        if text in preset_data:
+        if text in pet_preset_data:
             for i in range(5):
-                self.entries[i].setText(str(preset_data[text][i]))
+                self.entries[i].setText(str(pet_preset_data[text][i]))
             values = [int(entry.text()) for entry in self.entries]
             self.represent_box.setText(str(represent_s_pet(*values)))
             self.calculate()
@@ -253,8 +263,144 @@ class PetCalculatorApp(QWidget):
         except ValueError:
             self.result_box.setPlainText("잘못된 입력")
 
+class ExpCalculatorApp(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.init_ui()
+
+    def init_ui(self):
+        layout = QVBoxLayout()
+
+        # Dropdown + search
+        dropdown_layout = QHBoxLayout()
+        dropdown_label = QLabel("사냥터 선택:")
+        self.dropdown = QComboBox()
+        self.dropdown.setEditable(True)
+        self.dropdown.addItems(all_hunt_labels)
+        self.dropdown.setInsertPolicy(QComboBox.NoInsert)
+        self.dropdown.currentTextChanged.connect(self.on_dropdown_select)
+
+        dropdown_layout.addWidget(dropdown_label)
+        dropdown_layout.addWidget(self.dropdown)
+        layout.addLayout(dropdown_layout)
+
+        # Entry fields
+        entry_labels = ['시간당 경험치', '파티원 수', '아이템 배수(경구, 케이크)', '변템 +?%']
+        for label_text in entry_labels:
+            row = QHBoxLayout()
+            label = QLabel(label_text)
+            entry = QLineEdit()
+            entry.setValidator(QIntValidator())
+            row.addWidget(label)
+            row.addWidget(entry)
+            layout.addLayout(row)
+            if label_text == "시간당 경험치":
+                self.exp_hour = entry
+                self.exp_hour.setText(hunt_preset_data["해변 다이노 도우미"])
+            if label_text == "파티원 수":
+                entry.setText("1")
+                self.party_count = entry
+                entry.setText("5")
+            if label_text == "아이템 배수(경구, 케이크)":
+                entry.setText("1")
+                self.item_buff = entry
+            if label_text == "변템 +?%":
+                entry.setText("0")
+                self.transform_item = entry
+
+        
+        # newbie item flag
+        self.newbie_item_switch = SwitchButton("뉴비 나뭇가지 (경험치 +100%)")
+        self.newbie_item_switch.setChecked(False)
+        # self.filter_switch.stateChanged.connect(self.calculate)
+        layout.addWidget(self.newbie_item_switch)
+
+        # hero echo flag
+        self.hero_echo_switch = SwitchButton("영웅의 메아리 (전체 경험치 x2)")
+        self.hero_echo_switch.setChecked(False)
+        # self.sort_switch.stateChanged.connect(self.calculate)
+        layout.addWidget(self.hero_echo_switch)
+
+        # Entry fields
+        self.entries = []
+        entry_labels = ['현재 레벨', '현재 경험치 %', '목표 레벨']
+        for label_text in entry_labels:
+            row = QHBoxLayout()
+            label = QLabel(label_text)
+            entry = QLineEdit()
+            entry.setText("0")
+            self.entries.append(entry)
+            row.addWidget(label)
+            row.addWidget(entry)
+            layout.addLayout(row)
+            if label_text in ['현재 레벨', '목표 레벨']:
+                entry.setText("1")
+
+
+        # Calculate button
+        calc_btn = QPushButton("계산")
+        calc_btn.clicked.connect(self.calculate)
+        layout.addWidget(calc_btn)
+
+        # Result box
+        self.result_box = QTextEdit()
+        self.result_box.setReadOnly(True)
+        layout.addWidget(self.result_box)
+
+        # layout.setSpacing(0.5)
+        # layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(layout)
+
+    def on_dropdown_select(self, text):
+        if text in hunt_preset_data:
+            self.exp_hour.setText(hunt_preset_data[text])
+
+
+    def calculate(self):
+        total_exp = calculate_exp_buff(
+            exp=int(self.exp_hour.text()),
+            transform_item=int(self.transform_item.text()),
+            item_buff=int(self.item_buff.text()),
+            party_count=int(self.party_count.text()),
+            newbie_item=int(self.newbie_item_switch.isChecked()),
+            hero_echo=int(self.hero_echo_switch.isChecked())
+        )
+        required_time_min = calculate_time_for_lvl(
+            int(self.entries[0].text()),
+            float(self.entries[1].text()),
+            int(self.entries[2].text()),
+            int(total_exp)
+        )
+
+        self.result_box.setPlainText(format_result(
+            int(self.entries[0].text()),
+            float(self.entries[1].text()),
+            int(self.entries[2].text()),
+            required_time_min)
+        )
+
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("스톤에이지 클래식서버 - 이거저거 계산기")
+        self.setWindowIcon(QIcon("아이콘.ico"))
+
+        self.tab_widget = QTabWidget()
+        self.setCentralWidget(self.tab_widget)
+
+        # Add known tabs
+        tab1 = PetCalculatorApp()
+        tab2 = ExpCalculatorApp()
+
+        self.tab_widget.addTab(tab1, "페트")
+        self.tab_widget.addTab(tab2, "경험치")
+
+        self.resize(500, 800)
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = PetCalculatorApp()
+    window = MainWindow()
     window.show()
     sys.exit(app.exec())

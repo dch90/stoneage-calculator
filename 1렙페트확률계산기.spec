@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['ui.py'],
+    ['C:\\Users\\chung\\Desktop\\stoneage\\pet_calculator\\ui.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -19,16 +19,13 @@ pyz = PYZ(a.pure)
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries,
-    a.datas,
     [],
+    exclude_binaries=True,
     name='1렙페트확률계산기',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
     console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
@@ -36,4 +33,13 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon=['C:\\Users\\chung\\Desktop\\stoneage\\pet_calculator\\아이콘.ico'],
+)
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.datas,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name='1렙페트확률계산기',
 )
