@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 exp_table: list = [
     0, 2, 6, 18, 37, 67, 110, 170, 246,
     344, 464, 610, 782, 986, 1221, 1491, 1798, 2146, 2534,
@@ -16,6 +18,9 @@ exp_table: list = [
     70858959, 71244161, 100000000, 150000000, 200000000, 250000000, 300000000, 350000000, 400000000, 450000000,
     500000000
 ]
+
+def get_exp_buff_formula():
+    return "[(경험치) * (파티 보너스) * (경구 or 케이크) + (변신템) + (나뭇가지)] * (영메)"
 
 def calculate_exp_buff(
     exp: int,
@@ -59,7 +64,7 @@ def _remaining_exp(current_lvl: int, current_per: float, desired_lvl: int):
 def calculate_time_for_lvl(current_lvl: int, current_per: float, desired_lvl: int, exp_per_hour: int):
     if exp_per_hour == 0:
         return 0
-    desired_lvl = min(desired_lvl, 150)
+    desired_lvl = min(desired_lvl, 149)
     exp_per_min: float = exp_per_hour / 60
     
     remaining_exp = _remaining_exp(current_lvl, current_per, desired_lvl)
@@ -83,10 +88,21 @@ def _format_time(total_minutes: float):
     return " ".join(parts)
 
 
-def format_result(current_lvl: int, current_per: float, desired_lvl: int, time_in_min: float):
+def format_result(current_lvl: int, current_per: float, desired_lvl: int, time_in_min: float, total_exp: float):
     remaining_exp = _remaining_exp(current_lvl, current_per, desired_lvl)
+
+    # Get current time
+    now = datetime.now()
+    new_time = now + timedelta(minutes=time_in_min)
     
     return f"""
+        총 경험치 공식:
+        {get_exp_buff_formula()}
+        
+        시간당 경험치: {int(total_exp):,}
+
         필요 경험치: {remaining_exp:,}
         필요 시간 : {_format_time(time_in_min)}
+
+        레벨 달성 날짜: {new_time.strftime("%Y-%m-%d %H:%M")}
     """

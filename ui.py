@@ -310,7 +310,7 @@ class ExpCalculatorApp(QWidget):
 
         
         # newbie item flag
-        self.newbie_item_switch = SwitchButton("뉴비 나뭇가지 (경험치 +100%)")
+        self.newbie_item_switch = SwitchButton("뉴비지원 나뭇가지 (경험치 +100%)")
         self.newbie_item_switch.setChecked(False)
         # self.filter_switch.stateChanged.connect(self.calculate)
         layout.addWidget(self.newbie_item_switch)
@@ -372,11 +372,14 @@ class ExpCalculatorApp(QWidget):
             int(total_exp)
         )
 
-        self.result_box.setPlainText(format_result(
-            int(self.entries[0].text()),
-            float(self.entries[1].text()),
-            int(self.entries[2].text()),
-            required_time_min)
+        self.result_box.setPlainText(
+            format_result(
+                int(self.entries[0].text()),
+                float(self.entries[1].text()),
+                int(self.entries[2].text()),
+                required_time_min,
+                total_exp
+            )
         )
 
 
