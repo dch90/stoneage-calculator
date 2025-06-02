@@ -355,8 +355,21 @@ class ExpCalculatorApp(QWidget):
         if text in hunt_preset_data:
             self.exp_hour.setText(hunt_preset_data[text])
 
+    def set_textbox_minmax(self, textbox: QLineEdit, min: str, max: str):
+        if int(textbox.text()) < int(min): textbox.setText(min)
+        elif int(textbox.text()) > int(max): textbox.setText(max)
 
     def calculate(self):
+        self.set_textbox_minmax(self.party_count, "1", "5")
+        self.set_textbox_minmax(self.item_buff, "1", "999999999")
+        self.set_textbox_minmax(self.transform_item, "0", "999999999")
+        # current level
+        self.set_textbox_minmax(self.entries[0], "1", "150")
+        # percentage
+        self.set_textbox_minmax(self.entries[1], "0", "100")
+        #desired level
+        self.set_textbox_minmax(self.entries[2], "1", "150")
+        
         total_exp = calculate_exp_buff(
             exp=int(self.exp_hour.text()),
             transform_item=int(self.transform_item.text()),
@@ -386,7 +399,7 @@ class ExpCalculatorApp(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("스톤에이지 클래식서버 - 이거저거 계산기")
+        self.setWindowTitle("latte 계산기 v1.3.0 - 스톤에이지 클래식 서버")
         self.setWindowIcon(QIcon("아이콘.ico"))
 
         self.tab_widget = QTabWidget()

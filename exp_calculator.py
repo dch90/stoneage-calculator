@@ -54,7 +54,9 @@ def calculate_exp_buff(
     return total_exp
 
 def _remaining_exp(current_lvl: int, current_per: float, desired_lvl: int):
-    if current_lvl == desired_lvl:
+    current_lvl = min(current_lvl, 149)
+    desired_lvl = min(desired_lvl, 149)
+    if current_lvl >= desired_lvl:
         return 0
     remaining_exp = int(exp_table[current_lvl] * ((100 - current_per) / 100))
     for i in range((current_lvl+1), desired_lvl):
@@ -64,6 +66,7 @@ def _remaining_exp(current_lvl: int, current_per: float, desired_lvl: int):
 def calculate_time_for_lvl(current_lvl: int, current_per: float, desired_lvl: int, exp_per_hour: int):
     if exp_per_hour == 0:
         return 0
+    current_lvl = min(current_lvl, 149)
     desired_lvl = min(desired_lvl, 149)
     exp_per_min: float = exp_per_hour / 60
     
