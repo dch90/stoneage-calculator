@@ -358,6 +358,10 @@ class ExpCalculatorApp(QWidget):
     def set_textbox_minmax(self, textbox: QLineEdit, min: str, max: str):
         if int(textbox.text()) < int(min): textbox.setText(min)
         elif int(textbox.text()) > int(max): textbox.setText(max)
+    
+    def set_textbox_minmax_float(self, textbox: QLineEdit, min: str, max: str):
+        if float(textbox.text()) < float(min): textbox.setText(min)
+        elif float(textbox.text()) > float(max): textbox.setText(max)
 
     def calculate(self):
         self.set_textbox_minmax(self.party_count, "1", "5")
@@ -366,7 +370,7 @@ class ExpCalculatorApp(QWidget):
         # current level
         self.set_textbox_minmax(self.entries[0], "1", "150")
         # percentage
-        self.set_textbox_minmax(self.entries[1], "0", "100")
+        self.set_textbox_minmax_float(self.entries[1], "0", "100")
         #desired level
         self.set_textbox_minmax(self.entries[2], "1", "150")
         
