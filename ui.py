@@ -403,7 +403,7 @@ class ExpCalculatorApp(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("latte 계산기 v1.3.0 - 스톤에이지 클래식 서버")
+        self.setWindowTitle("latte 계산기 v1.3.1 - 스톤에이지 클래식서버")
         self.setWindowIcon(QIcon("아이콘.ico"))
 
         self.tab_widget = QTabWidget()
